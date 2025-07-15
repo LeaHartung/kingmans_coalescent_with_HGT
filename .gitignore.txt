@@ -1,0 +1,4 @@
+# ignore simulation results 
+
+results/*
+plots/*
