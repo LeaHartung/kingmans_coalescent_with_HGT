@@ -4,7 +4,7 @@ import random
 
 from itertools import product, permutations
 
-from kingmans_coalescent import iterative_tree_build, update_tree_string
+from .kingmans_coalescent import iterative_tree_build, update_tree_string
 
 
 def iterative_gene_tree_build(

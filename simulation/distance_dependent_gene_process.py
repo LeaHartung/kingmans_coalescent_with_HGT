@@ -5,7 +5,7 @@ from itertools import product
 import dendropy
 from phylodm import PhyloDM
 
-from kingmans_coalescent import iterative_tree_build, update_tree_string
+from .kingmans_coalescent import iterative_tree_build, update_tree_string
 
 tns = dendropy.TaxonNamespace()
 
