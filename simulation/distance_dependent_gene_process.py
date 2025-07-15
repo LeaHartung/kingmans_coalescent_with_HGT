@@ -36,7 +36,6 @@ def iterative_dd_gene_tree_build(
         n_individuals: int,
         HGT_rate: float,
         realised_coalescent_events: pd.DataFrame,
-        surviving_lineages: pd.DataFrame,
         species_dist_matrix: np.array,
 ):
     """
