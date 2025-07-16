@@ -23,12 +23,12 @@ def wrapper(
         n_genes: int,
         HGT_type: str,
 ):
-    if HGT_type == "panmictic":
+    if HGT_type == "uniform":
         gene_simulation_function = iterative_gene_tree_build
     elif HGT_type == "distance_dependent":
         gene_simulation_function = iterative_dd_gene_tree_build
     else:
-        raise ValueError(f"HGT_type must be either \"panmictic\" or \"distance_dependent\"")
+        raise ValueError(f"HGT_type must be either \"uniform\" or \"distance_dependent\"")
 
     output = []
     output_trees = []
@@ -53,7 +53,7 @@ def wrapper(
             "realised_coalescent_events": realised_coalescent_events,
         }
 
-        if HGT_type == "panmictic":
+        if HGT_type == "uniform":
             gene_simulation_arguments["surviving_lineages"] = surviving_lineages
         elif HGT_type == "distance_dependent":
             species_tree_dendro = dendropy.Tree.get(
@@ -99,12 +99,12 @@ def single_input_wrapper(input: list[int, float, float, int, str]):
 
 if __name__ == "__main__":
     # model parameters
-    speciation_rate = 1
-    HGT_rate = np.concatenate([np.linspace(0.1,1,10),np.linspace(2, 10, 9)])[0:3]
+    speciation_rate = [1]
+    HGT_rate = np.concatenate([np.linspace(0.1,1,10),np.linspace(2, 10, 9)])
     n_genes = 3
-    n_individuals = [5]#, 10, 20, 50]
-    HGT_type = "panmictic"  # must be either "panmictic" or "distance_dependent"
-    assert HGT_type in ["panmictic", "distance_dependent"], f"HGT_type must be either \"panmictic\" or \"distance_dependent\", got {HGT_type}"
+    n_individuals = [5, 10, 20, 50]
+    HGT_type = "uniform"  # must be either "uniform" or "distance_dependent"
+    assert HGT_type in ["uniform", "distance_dependent"], f"HGT_type must be either \"uniform\" or \"distance_dependent\", got {HGT_type}"
 
     # simulation parameters
     sample_size = 10000
@@ -112,11 +112,14 @@ if __name__ == "__main__":
 
     # create the folders to save the simulation results
     time_now = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-    new_path = os.path.join("results", time_now)
+    new_path = os.path.join("../results", time_now)
     os.makedirs(new_path)
 
     tree_path = os.path.join(new_path, "tree_strings")
     os.makedirs(tree_path)
+
+    t_MRCA_path = os.path.join(new_path, "t_MRCA")
+    os.makedirs(t_MRCA_path)
 
     # save the metadata of the simulation
     idx = [
@@ -126,6 +129,7 @@ if __name__ == "__main__":
         "n_individuals",
         "sample_size",
         "num_processes",
+        "HGT_type",
     ]
     data = [
         speciation_rate,
@@ -134,12 +138,13 @@ if __name__ == "__main__":
         n_individuals,
         sample_size,
         num_processes,
+        HGT_type,
     ]
     meta_data = pd.Series(index=idx, data=data)
     meta_data.to_csv(os.path.join(new_path, "meta_data.csv"), header=False)
 
     # start simulation iteration
-    for variables in product(n_individuals, [speciation_rate], HGT_rate, [n_genes], [HGT_type]):
+    for variables in product(n_individuals, speciation_rate, HGT_rate, [n_genes], [HGT_type]):
         print(f"Start simulation with {variables[0]} ind, speciation {variables[1]}, HGT {variables[2]}, genes {variables[3]}.")
         inputs = [list(variables)] * sample_size
 
@@ -150,7 +155,7 @@ if __name__ == "__main__":
         result_df = pd.DataFrame(results, columns=column_names_times + column_names_tree_strings)
 
         result_df[column_names_times].to_csv(
-            os.path.join(new_path, f"ind_{variables[0]}_srate_{variables[1]}_HGTrate_{variables[2]}.csv"),
+            os.path.join(t_MRCA_path, f"ind_{variables[0]}_srate_{variables[1]}_HGTrate_{variables[2]}.csv"),
             index=False)
 
         result_df[column_names_tree_strings].to_csv(
