@@ -33,6 +33,8 @@ def iterative_gene_tree_build(
     t_next_realised_speciation_event = realised_coalescent_events.iloc[0]['time']
     last_species_coalescent_time = realised_coalescent_events.iloc[-1]['time']
 
+    HGT_count = 0
+    event_type = None
     while time < last_species_coalescent_time:
         active_species = surviving_lineages[surviving_lineages['time'] <= time].iloc[-1, 1]
         number_of_surviving_species = len(active_species)
@@ -46,6 +48,8 @@ def iterative_gene_tree_build(
         if time < t_next_realised_speciation_event:
             # HGT happens
             # draw which lines merge and direction
+            event_type = 'HGT'
+
             HGT_between_active_alleles = list(permutations(list(allele_tree_dict.keys()), 2))
             species_without_allele = [x for x in active_species if x not in allele_tree_dict.keys()]
             HGT_species_transfer = list(product(species_without_allele, list(allele_tree_dict.keys())))
@@ -55,6 +59,8 @@ def iterative_gene_tree_build(
             death = merging_lines[1]
         else:
             # speciation happens
+            event_type = "speciation"
+
             merging_species = realised_coalescent_events[
                 realised_coalescent_events['time'] == t_next_realised_speciation_event]
 
@@ -78,11 +84,15 @@ def iterative_gene_tree_build(
 
             allele_tree_dict[birth] = (allele_tree_dict[birth], allele_tree_dict[death])
             allele_tree_dict.pop(death)
+            if event_type == 'HGT':
+                HGT_count += 1
         elif death in allele_tree_dict:  # transfer of an allele lineage
             allele_tree_dict[birth] = allele_tree_dict.pop(death)
             allele_tree_string[birth] = allele_tree_string.pop(death)
+            if event_type == 'HGT':
+                HGT_count += 1
 
-    return allele_tree_string, allele_tree_string
+    return allele_tree_string, allele_tree_string, HGT_count
 
 
 if __name__ == '__main__':
@@ -96,7 +106,7 @@ if __name__ == '__main__':
 
     HGT_rate = 1
 
-    allele_tree_dict, allele_tree_string = iterative_gene_tree_build(
+    allele_tree_dict, allele_tree_string, n_HGTs = iterative_gene_tree_build(
         n_individuals=n_individuals,
         HGT_rate=HGT_rate,
         realised_coalescent_events=realised_coalescent_events,

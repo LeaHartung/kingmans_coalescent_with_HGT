@@ -67,7 +67,7 @@ def wrapper(
             gene_simulation_arguments["species_dist_matrix"] = species_dist_matrix
 
 
-        gene_tree_dict, gene_tree_string = gene_simulation_function(**gene_simulation_arguments)
+        gene_tree_dict, gene_tree_string, n_HGTs = gene_simulation_function(**gene_simulation_arguments)
 
         newick_string_alleles = gene_tree_string[[*gene_tree_string][0]][0] + ";"
         t_alleles = Tree(newick_string_alleles, format=5)
