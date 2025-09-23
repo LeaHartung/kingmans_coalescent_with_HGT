@@ -141,7 +141,7 @@ if __name__ == "__main__":
         HGT_type,
     ]
     meta_data = pd.Series(index=idx, data=data)
-    meta_data.to_csv(os.path.join(new_path, "meta_data.csv"), header=False)
+    meta_data.to_csv(os.path.join(new_path, "simulation_parameters.csv"), header=False)
 
     # start simulation iteration
     for variables in product(n_individuals, speciation_rate, HGT_rate, [n_genes], [HGT_type]):
