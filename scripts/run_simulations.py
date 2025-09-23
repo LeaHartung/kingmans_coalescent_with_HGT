@@ -13,7 +13,7 @@ tns = dendropy.TaxonNamespace()
 
 from simulation.kingmans_coalescent import iterative_tree_build
 from simulation.gene_process import iterative_gene_tree_build
-from simulation.distance_dependent_gene_process import iterative_dd_gene_tree_build
+from simulation.distance_dependent_gene_process import iterative_dd_gene_tree_build_ihpp
 
 
 def wrapper(
@@ -26,7 +26,7 @@ def wrapper(
     if HGT_type == "uniform":
         gene_simulation_function = iterative_gene_tree_build
     elif HGT_type == "distance_dependent":
-        gene_simulation_function = iterative_dd_gene_tree_build
+        gene_simulation_function = iterative_dd_gene_tree_build_ihpp
     else:
         raise ValueError(f"HGT_type must be either \"uniform\" or \"distance_dependent\"")
 

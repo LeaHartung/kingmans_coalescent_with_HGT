@@ -1,52 +1,79 @@
 import pandas as pd
 import numpy as np
+import decimal
 from itertools import product
 
 import dendropy
 from phylodm import PhyloDM
 
-from .kingmans_coalescent import iterative_tree_build, update_tree_string
+from simulation.kingmans_coalescent import iterative_tree_build, update_tree_string
 
 tns = dendropy.TaxonNamespace()
+rng = np.random.default_rng()
 
 
-def draw_involved_allele_lines(dist_matrix: pd.DataFrame) -> [int, int]:
+def draw_next_HGT_event_ihpp(
+        start: float,
+        stop: float,
+        species_distance: float,
+        HGT_rate: float = 1,
+        threshold: float = 0,
+):
+    """Function to draw the next HGT event according to an inhomogeneous Poisson process
+    for a given time frame and distance between two species.
+
+    We use the intensity function HGT_rate*e^(x - 0.5*species_distance+ 0.5*threshold) for the inhomogeneous PP.
+    Where threshold is an optional x-offset, that gives a threshold, for which distances the intensity function should
+    be larger than the uniform HGT rate.
+
+    If no event happens before the time horizon, this function will return a value larger
+    than the time horizon. This is intentional as it represent the next HGT happening
+    after the next event in the species tree.
+
+    If the given distance is 0, np.inf (infinity) is returned.
+
+    :param start: the lower bound of the time interval for the simulation
+    :param stop: the upper bound of the time interval for the simulation
+                        (in our cas the time of next event in the species tree)
+    :param species_distance: Distance of the species in the species tree
+    :param HGT_rate: optional factor to rescale the amount of HGT events happening
+    :param threshold: optional threshold for the intensity function of the inhomogeneous PP
+    :return: time to the next HGT event between two species.
     """
-    Draw involved allele lines in a potential HGT event from a distance matrix.
+    if species_distance == 0:
+        return np.inf
 
-    :param dist_matrix: distance matrix of the species tree
-    :return: pair of birth and death labels
-    """
-    df_inv = 1 / dist_matrix
-    df_inv = df_inv.replace(np.inf, 0)
+    intensity_function = lambda x: HGT_rate*float(np.exp(decimal.Decimal(x - 0.5*species_distance + 0.5*threshold)))
 
-    pairs = []
-    probs = []
-    for pair in product(df_inv.index, df_inv.columns):
-        pairs.append(pair)
-        probs.append(df_inv.loc[pair])
-    probs = probs / sum(probs)
+    upper_bound = intensity_function(stop)
 
-    ij = np.random.choice(range(len(pairs)), size=1, p=probs)
+    event_times = []
+    current_time = start
+    while current_time < stop:
+        new_point = rng.exponential(1 / (HGT_rate * upper_bound), 1)[0]
+        current_time += new_point
+        event_times += [current_time]
 
-    return pairs[ij[0]]  # = birth, death
+    for event_time in event_times:
+        u = rng.uniform(0, 1)
+        if u < intensity_function(event_time) / upper_bound:
+            return event_time
 
 
-def iterative_dd_gene_tree_build(
+def iterative_dd_gene_tree_build_ihpp(
         n_individuals: int,
         HGT_rate: float,
         realised_coalescent_events: pd.DataFrame,
         species_dist_matrix: np.array,
+        threshold: float = 0,
 ):
     """
     Function that iteratively builds the phylogenetic tree of a gene with distance dependent HGT
-    given the underlying species tree.
+    following an inhomogeneous Poisson process and an underlying species tree.
 
     :param n_individuals: number of individuals in the population
     :param HGT_rate: Rate at which the HGT events happen
     :param realised_coalescent_events: The time and direction of the coalescent events in the species tree
-    :param surviving_lineages: pd.DatFrame holding the time of each coalescence event in the species tree and which
-                                species lineages were still active afterward
     :param species_dist_matrix: np.array holding the species distance matrix
 
     :return:
@@ -64,30 +91,33 @@ def iterative_dd_gene_tree_build(
     t_next_realised_speciation_event = realised_coalescent_events.iloc[0]['time']
     last_species_colaescent_time = realised_coalescent_events.iloc[-1]['time']
 
+    HGT_count = 0
     event_type = None
     while time < last_species_colaescent_time:
         number_of_surviving_alleles = len(allele_tree_dict.keys())
         if number_of_surviving_alleles == 1:
             break
 
-        inv_dist_mat = current_species_dist_matrix.rdiv(1)  # get reciprocal of dist mat entries
-        inv_dist_mat = inv_dist_mat.replace(np.inf, 0)
-        rate_next_HGT_event = 0.5 * HGT_rate * inv_dist_mat.sum().sum()
-        try:
-            assert rate_next_HGT_event > 0
-        except AssertionError:
-            print(f"rate below 0: {rate_next_HGT_event}")
-            raise AssertionError
-        time_to_next_HGT_event = np.random.default_rng().exponential(scale=1 / rate_next_HGT_event, size=1)[0]
-        time = time + time_to_next_HGT_event
+        sampling_function = lambda x: draw_next_HGT_event_ihpp(start=time,
+                                                               stop=t_next_realised_speciation_event,
+                                                               species_distance=x,
+                                                               HGT_rate=HGT_rate,
+                                                               threshold=threshold,
+                                                               )
+        next_HGT_events = current_species_dist_matrix.map(sampling_function)
 
-        if time < t_next_realised_speciation_event:
+        time_of_next_HGT_event = next_HGT_events.min().min()
+
+        if time_of_next_HGT_event < t_next_realised_speciation_event:
             # HGT happens
             # draw which lines merge and direction
             event_type = 'HGT'
-            copy_mat = current_species_dist_matrix.copy()
 
-            birth, death = draw_involved_allele_lines(copy_mat)
+            min_idx = np.where(next_HGT_events == time_of_next_HGT_event)
+            birth = current_species_dist_matrix.index[min_idx[0][0]]
+            death = current_species_dist_matrix.columns[min_idx[1][0]]
+
+            time = time_of_next_HGT_event
         else:
             # speciation happens
             event_type = "speciation"
@@ -116,7 +146,9 @@ def iterative_dd_gene_tree_build(
             allele_tree_dict.pop(death)
 
             current_species_dist_matrix = current_species_dist_matrix.drop(death, axis=1)  # delete recipient column
-            if event_type == 'speciation':
+            if event_type == 'HGT':
+                HGT_count += 1
+            elif event_type == 'speciation':
                 current_species_dist_matrix = current_species_dist_matrix.drop(death, axis=0)  # delete recipient row
 
         elif death in allele_tree_dict:  # transfer of an allele lineage
@@ -127,14 +159,16 @@ def iterative_dd_gene_tree_build(
             # reintroduce origin column
             current_species_dist_matrix[birth] = original_species_dist_matrix[birth].loc[
                 current_species_dist_matrix.index]
-            if event_type == 'speciation':
+            if event_type == 'HGT':
+                HGT_count += 1
+            elif event_type == 'speciation':
                 current_species_dist_matrix = current_species_dist_matrix.drop(death, axis=0)  # delete recipient row
 
         else:
             assert event_type == "speciation"
-            current_species_dist_matrix = current_species_dist_matrix.drop(death, axis=0)  # delete recipient row
-    return allele_tree_string, allele_tree_string
+            current_species_dist_matrix = current_species_dist_matrix.drop(death, axis=0) # delete recipient row
 
+    return allele_tree_string, allele_tree_string, HGT_count
 
 if __name__ == '__main__':
     n_individuals = 5
@@ -156,11 +190,10 @@ if __name__ == '__main__':
 
     HGT_rate = 1
 
-    allele_tree_dict, allele_tree_string = iterative_dd_gene_tree_build(
+    allele_tree_dict, allele_tree_string, n_HGTs = iterative_dd_gene_tree_build_ihpp(
         n_individuals=n_individuals,
         HGT_rate=HGT_rate,
         realised_coalescent_events=realised_coalescent_events,
-        surviving_lineages=surviving_lineages,
         species_dist_matrix=dm_species_tree,
     )
 
