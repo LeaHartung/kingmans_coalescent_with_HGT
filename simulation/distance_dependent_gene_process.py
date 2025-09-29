@@ -120,7 +120,7 @@ def iterative_dd_gene_tree_build_ihpp(
             time = time_of_next_HGT_event
         else:
             # speciation happens
-            event_type = "speciation"
+            event_type = 'speciation'
             merging_species = realised_coalescent_events[
                 realised_coalescent_events['time'] == t_next_realised_speciation_event]
 
@@ -165,7 +165,7 @@ def iterative_dd_gene_tree_build_ihpp(
                 current_species_dist_matrix = current_species_dist_matrix.drop(death, axis=0)  # delete recipient row
 
         else:
-            assert event_type == "speciation"
+            assert event_type == 'speciation'
             current_species_dist_matrix = current_species_dist_matrix.drop(death, axis=0) # delete recipient row
 
     return allele_tree_string, allele_tree_string, HGT_count
@@ -180,8 +180,8 @@ if __name__ == '__main__':
     )
 
     species_tree = dendropy.Tree.get(
-        data=list(tree_string.values())[0][0] + ";",
-        schema="newick",
+        data=list(tree_string.values())[0][0] + ';',
+        schema='newick',
         taxon_namespace=tns,
     )
 

@@ -59,7 +59,7 @@ def iterative_gene_tree_build(
             death = merging_lines[1]
         else:
             # speciation happens
-            event_type = "speciation"
+            event_type = 'speciation'
 
             merging_species = realised_coalescent_events[
                 realised_coalescent_events['time'] == t_next_realised_speciation_event]

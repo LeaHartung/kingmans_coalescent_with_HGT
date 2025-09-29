@@ -15,12 +15,12 @@ def try_eval(x):
         return x
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     results_dir = '../results'
     time_string = '2025-09-23_14-44-35'
 
     input_dir = os.path.join(results_dir, time_string)
-    tree_dir = os.path.join(input_dir, "tree_strings")
+    tree_dir = os.path.join(input_dir, 'tree_strings')
 
     distance_functions = {
         'rf_dist': rf_distance,
