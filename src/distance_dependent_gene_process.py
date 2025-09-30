@@ -6,7 +6,7 @@ from itertools import product
 import dendropy
 from phylodm import PhyloDM
 
-from simulation.kingmans_coalescent import iterative_tree_build, update_tree_string
+from src.kingmans_coalescent import iterative_tree_build, update_tree_string
 
 tns = dendropy.TaxonNamespace()
 rng = np.random.default_rng()

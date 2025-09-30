@@ -1,4 +1,4 @@
-from simulation.tree_distances import average_distances, rf_distance, bl_distance, dist_matr_distance
+from src.tree_distances import average_distances, rf_distance, bl_distance, dist_matr_distance
 
 import os
 import pandas as pd

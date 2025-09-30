@@ -11,9 +11,9 @@ from ete3 import Tree
 from phylodm import PhyloDM
 tns = dendropy.TaxonNamespace()
 
-from simulation.kingmans_coalescent import iterative_tree_build
-from simulation.gene_process import iterative_gene_tree_build
-from simulation.distance_dependent_gene_process import iterative_dd_gene_tree_build_ihpp
+from src.kingmans_coalescent import iterative_tree_build
+from src.gene_process import iterative_gene_tree_build
+from src.distance_dependent_gene_process import iterative_dd_gene_tree_build_ihpp
 
 
 def wrapper(
