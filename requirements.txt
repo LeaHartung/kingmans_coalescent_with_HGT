@@ -1,0 +1,12 @@
+numpy~=2.2.0
+pandas~=2.2.0
+scipy~=1.15.0
+ete3~=3.1.0
+PyQt5~=5.15.0
+DendroPy~=5.0.0
+phylodm~=3.2.0
+parallelbar~=2.5
+matplotlib==3.9.1.post1
+seaborn~=0.13.0
+scikit-learn~=1.7.0
+svgutils~=0.3.4
