@@ -204,32 +204,3 @@ def average_distances(input_dir,
 
     avrg_distances.to_csv(save_file, index=False)
     return avrg_distances
-
-
-
-if __name__ == '__main__':
-    nwk1 = '((3:0.40423157232759777, (4:0.2478364463156182, 0:0.2478364463156182):0.15639512601197958):0.21134272078739158, (1:0.6059330781358645, 2:0.6059330781358645):0.009641214979124846);'
-    nwk2 = '((3:0.40423157232759777, (4:0.2478364463156182, 0:0.2478364463156182):0.15639512601197958):0.21134272078739158, (1:0.6059330781358645, 2:0.6059330781358645):0.009641214979124846);'
-    nwk3 = '((3:0.40423157232759777, (4:0.2478364463156182, (0:0.1775268810369201, 2:0.1775268810369201):0.07030956527869808):0.15639512601197958):0.21134272078739158, 1:0.6155742931149893);'
-    nwk4 = '((3:0.40423157232759777, (4:0.2478364463156182, 0:0.2478364463156182):0.15639512601197958):0.21134272078739158, (1:0.6059330781358645, 2:0.6059330781358645):0.009641214979124846);'
-
-    print(rf_distance(nwk1, nwk3))
-    print(bl_distance(nwk1, nwk3))
-    print(bl_distance(nwk1, nwk3, normalise=True))
-    print(dist_matr_distance(nwk1, nwk3))
-    print(dist_matr_distance(nwk1, nwk3, normalise=True))
-
-    nwk_df = pd.DataFrame(data=[[nwk1, nwk2, nwk3, nwk4]],
-                          columns=['species_tree', 'gene_tree_1', 'gene_tree_2', 'gene_tree_3']
-                          )
-
-    distances_to_species = distances_species_gene(nwk_df,
-                                       rf_distance,
-                                       )
-    print(distances_to_species)
-
-    distances_genes = distances_between_genes(nwk_df,
-                                              rf_distance,
-                                              )
-
-

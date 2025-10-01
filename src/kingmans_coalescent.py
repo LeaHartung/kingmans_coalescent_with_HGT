@@ -89,18 +89,3 @@ def iterative_tree_build(
     surviving_lineages = surviving_lineages.reset_index(drop=True)
 
     return tree_dict, tree_string, realised_coalescent_events, surviving_lineages
-
-
-if __name__ == '__main__':
-    n_individuals = 5
-    speciation_rate = 1
-
-    tree_dict, tree_string, realised_coalescence_events, surviving_lineages = iterative_tree_build(
-        n_individuals=n_individuals,
-        rate=speciation_rate,
-    )
-
-    print(tree_dict)
-    print(tree_string)
-    print(realised_coalescence_events)
-    print(surviving_lineages)
