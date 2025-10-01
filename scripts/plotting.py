@@ -129,9 +129,9 @@ if __name__ == '__main__':
     for i in range(len(simulation_parameters['n_individuals'])):
         for k in range(len(simulation_parameters['HGT_rate'])):
             results = pd.read_csv(os.path.join(input_dir,
-                                               f'ind_{simulation_parameters['n_individuals'][i]}'
-                                               f'_srate_{simulation_parameters['speciation_rate'][0]}'
-                                               f'_HGTrate_{simulation_parameters['HGT_rate'][k]}.csv'))
+                                               f'ind_{simulation_parameters["n_individuals"][i]}'
+                                               f'_srate_{simulation_parameters["speciation_rate"][0]}'
+                                               f'_HGTrate_{simulation_parameters["HGT_rate"][k]}.csv'))
             average_t_MRCA_species.iloc[k, i] = results['time_species'].mean()
             average_t_MRCA_alleles.iloc[k, i] = results[f'time_alleles_0'].mean()
 
@@ -176,7 +176,7 @@ if __name__ == '__main__':
         data = pd.DataFrame(columns=['time_species'] + [f'time_alleles_{i}' for i in range(simulation_parameters['n_genes'])] + ['HGT_rate'])
         for rate_HGT in simulation_parameters['HGT_rate']:
             results = pd.read_csv(
-                os.path.join(input_dir, f'ind_{n_indiv}_srate_{simulation_parameters['speciation_rate'][0]}_HGTrate_{rate_HGT}.csv'))
+                os.path.join(input_dir, f'ind_{n_indiv}_srate_{simulation_parameters["speciation_rate"][0]}_HGTrate_{rate_HGT}.csv'))
             results['HGT_rate'] = str(round(rate_HGT, 2))
             data = pd.concat([data, results], ignore_index=True)
         data.iloc[:, 1:-1] = data.iloc[:, 1:-1].div(data.time_species, axis=0)
@@ -247,7 +247,7 @@ if __name__ == '__main__':
         for n_indiv in simulation_parameters['n_individuals']:
             for rate_HGT in simulation_parameters['HGT_rate']:
                 emp_times = \
-                pd.read_csv(os.path.join(input_dir, f'ind_{n_indiv}_srate_{simulation_parameters['speciation_rate'][0]}_HGTrate_{rate_HGT}.csv'))[
+                pd.read_csv(os.path.join(input_dir, f'ind_{n_indiv}_srate_{simulation_parameters["speciation_rate"][0]}_HGTrate_{rate_HGT}.csv'))[
                     f'time_alleles_0']
                 theo_times = time_MRCA_alleles(sample_size=len(emp_times), n_individuals=n_indiv, HGT_rate=rate_HGT)
 
@@ -268,7 +268,7 @@ if __name__ == '__main__':
                 plt.xlabel('theoretic quantiles')
                 plt.ylabel('empirical quantiles')
                 plt.savefig(os.path.join(qq_dir,
-                            f'qq_plot_ind_{n_indiv}_srate_{simulation_parameters['speciation_rate'][0]}_HGTrate_{round(rate_HGT, 2)}.png'),
+                            f'qq_plot_ind_{n_indiv}_srate_{simulation_parameters["speciation_rate"][0]}_HGTrate_{round(rate_HGT, 2)}.png'),
                             transparent=True, bbox_inches='tight', dpi=300)
                 plt.close()
         mses.to_csv(os.path.join(qq_dir, 'MSE_qq_T_MRCA_latex.csv'), sep='&')
