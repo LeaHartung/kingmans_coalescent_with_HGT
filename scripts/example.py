@@ -84,15 +84,6 @@ if __name__ == '__main__':
     species_nwk_str += ';'
     species_tree = Tree(species_nwk_str)
 
-    species_ts = ts
-    #species_tree.show(tree_style=ts)
-    species_tree.render(os.path.join(plotting_dir, 'species_tree.svg'),
-                             h=180,
-                             w=160,
-                             units='mm',
-                             tree_style=species_ts,
-                             )
-
     # build gene tree with uniform HGT
     uniform_gene_tree_dict, uniform_gene_tree_string, n_HGTs_uniform = iterative_gene_tree_build(
         n_individuals=n_species,
@@ -105,18 +96,8 @@ if __name__ == '__main__':
     uniform_gene_nwk_str += ';'
     uniform_gene_tree = Tree(uniform_gene_nwk_str)
 
-    uniform_gene_ts  = ts
-    # uniform_gene_tree.show(tree_style=ts)
-    uniform_gene_tree.render(os.path.join(plotting_dir, 'uniform_gene_tree.svg'),
-                             h=180,
-                             w=160,
-                             units='mm',
-                             tree_style=uniform_gene_ts,
-                             )
-
     # build gene tree with distance dependent HGT
-
-    # find the distance matrix of the species tree
+    # first, find the distance matrix of the species tree
     species_tree = dendropy.Tree.get(
         data=species_nwk_str,
         schema='newick',
@@ -135,15 +116,6 @@ if __name__ == '__main__':
     dd_gene_nwk_str, dd_gene_T_MRCA = next(iter(dd_gene_tree_string.values()))
     dd_gene_nwk_str += ';'
     dd_gene_tree = Tree(dd_gene_nwk_str)
-
-    dd_gene_ts = ts
-    #dd_gene_tree.show(tree_style=ts)
-    dd_gene_tree.render(os.path.join(plotting_dir, 'dd_gene_tree.svg'),
-                             h=180,
-                             w=160,
-                             units='mm',
-                             tree_style=dd_gene_ts,
-                             )
 
     # calculate the distances between the species tree and gene trees
     distances_df = pd.DataFrame(columns=['uniform HGT', 'dd HGT'])
@@ -170,6 +142,31 @@ if __name__ == '__main__':
     print('\nDistances between species and gene tree (for both uniform and distance dependent HGT):\n')
     print(distances_df)
 
+    # plotting the trees with ete3
+
+    #species_tree.show(tree_style=ts)
+    species_tree.render(os.path.join(plotting_dir, 'species_tree.svg'),
+                             h=180,
+                             w=160,
+                             units='mm',
+                             tree_style=ts,
+                             )
+
+    # uniform_gene_tree.show(tree_style=ts)
+    uniform_gene_tree.render(os.path.join(plotting_dir, 'uniform_gene_tree.svg'),
+                             h=180,
+                             w=160,
+                             units='mm',
+                             tree_style=ts,
+                             )
+
+    #dd_gene_tree.show(tree_style=ts)
+    dd_gene_tree.render(os.path.join(plotting_dir, 'dd_gene_tree.svg'),
+                             h=180,
+                             w=160,
+                             units='mm',
+                             tree_style=ts,
+                             )
 
     # plot all three trees next to each other and save to combined.svg (the trees are not on the same scale!)
     combine_svgs(
