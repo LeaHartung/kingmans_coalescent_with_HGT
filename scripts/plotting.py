@@ -23,12 +23,12 @@ def try_eval(x):
 
 
 # implementation of bounded KDE from https://towardsdatascience.com/bounded-kernel-density-estimation-2082dff3f47f/
-def silverman_bandwidth(x_data: np.ndarray) -> float:
+def silverman_bandwidth(x_data: np.ndarray) -> float: # from https://towardsdatascience.com/bounded-kernel-density-estimation-2082dff3f47f/
     ma_x_data = np.ma.masked_array(x_data, ~np.isfinite(x_data))
     return (4/(3*x_data.shape[0]))**0.2 * np.std(ma_x_data)
 
 
-def basic_kde(x_data: np.ndarray, x_prediction: np.ndarray) -> np.ndarray:
+def basic_kde(x_data: np.ndarray, x_prediction: np.ndarray) -> np.ndarray: # from https://towardsdatascience.com/bounded-kernel-density-estimation-2082dff3f47f/
     """Perform Gaussian Kernel Density Estimation.
     Args:
         x_data: Sample points drawn from the distribution to estimate.
@@ -46,7 +46,7 @@ def basic_kde(x_data: np.ndarray, x_prediction: np.ndarray) -> np.ndarray:
     densities = np.mean(pdf_values, axis=0)
     return densities
 
-def weighted_kde(x_data: np.ndarray, x_prediction: np.ndarray) -> np.ndarray:
+def weighted_kde(x_data: np.ndarray, x_prediction: np.ndarray) -> np.ndarray: # from https://towardsdatascience.com/bounded-kernel-density-estimation-2082dff3f47f/
     h = silverman_bandwidth(x_data)  # Required to evaluate CDF
     area_values = norm.cdf(1.0, x_prediction, h) - norm.cdf(0.0, x_prediction, h)
     basic_densities = basic_kde(x_data, x_prediction)
@@ -70,7 +70,7 @@ def time_MRCA_alleles(sample_size: int, n_individuals: int, HGT_rate: float, spe
         t_next_coalescent = np.random.default_rng().exponential(scale=1 / rate, size=sample_size)
         t_MRCA = t_MRCA + t_next_coalescent
 
-    return pd.Series(t_MRCA, name="theoretic_time")
+    return pd.Series(t_MRCA, name='theoretic_time')
 
 
 def plotting_average_distances(
@@ -89,9 +89,9 @@ def plotting_average_distances(
         value_name='distance',
     )
 
-    sns.set_theme(style="whitegrid", font_scale=1.3)
+    sns.set_theme(style='whitegrid', font_scale=1.3)
     fig, ax = plt.subplots(figsize=(7.2, 5.4))
-    sns.scatterplot(data=data_melted, x="HGT_rate", y="distance", hue="n_individuals", palette="crest")
+    sns.scatterplot(data=data_melted, x='HGT_rate', y='distance', hue='n_individuals', palette='crest')
     ax.set_ylabel(y_label)
     ax.set_xlabel(x_label)
     ax.legend(title=legent_title)
@@ -129,72 +129,72 @@ if __name__ == '__main__':
     for i in range(len(simulation_parameters['n_individuals'])):
         for k in range(len(simulation_parameters['HGT_rate'])):
             results = pd.read_csv(os.path.join(input_dir,
-                                               f"ind_{simulation_parameters['n_individuals'][i]}"
-                                               f"_srate_{simulation_parameters['speciation_rate'][0]}"
-                                               f"_HGTrate_{simulation_parameters['HGT_rate'][k]}.csv"))
-            average_t_MRCA_species.iloc[k, i] = results["time_species"].mean()
-            average_t_MRCA_alleles.iloc[k, i] = results[f"time_alleles_0"].mean()
+                                               f'ind_{simulation_parameters["n_individuals"][i]}'
+                                               f'_srate_{simulation_parameters["speciation_rate"][0]}'
+                                               f'_HGTrate_{simulation_parameters["HGT_rate"][k]}.csv'))
+            average_t_MRCA_species.iloc[k, i] = results['time_species'].mean()
+            average_t_MRCA_alleles.iloc[k, i] = results[f'time_alleles_0'].mean()
 
     # plot average t_MRCA for the allele process
     data = average_t_MRCA_alleles
-    data = data.reset_index(names=["HGT_rate"]).melt(id_vars="HGT_rate", var_name="n_individuals")
+    data = data.reset_index(names=['HGT_rate']).melt(id_vars='HGT_rate', var_name='n_individuals')
 
-    sns.set_theme(style="whitegrid", font_scale=1.3)
+    sns.set_theme(style='whitegrid', font_scale=1.3)
     ax = sns.relplot(
         kind='line',
         data=data,
         x='HGT_rate', y='value',
         hue='n_individuals',
-        palette="crest",
+        palette='crest',
     )
-    ax.set_axis_labels("HGT_rate", "T_MRCA(alleles)")
-    ax._legend.set_title("Number of \nspecies")
+    ax.set_axis_labels('HGT_rate', 'T_MRCA(alleles)')
+    ax._legend.set_title('Number of \nspecies')
 
     # if we used uniform HGT, add theoretical points
     if simulation_parameters['HGT_type'] == 'uniform':
-        theoretical_t_MRCA = pd.DataFrame(columns=["HGT_rate", "T_MRCA", "n_individuals"])
+        theoretical_t_MRCA = pd.DataFrame(columns=['HGT_rate', 'T_MRCA', 'n_individuals'])
         for idx, row in data.iterrows():
-            t_theo = (2 / (simulation_parameters['speciation_rate'][0] + row["HGT_rate"])) * (1 - 1 / row["n_individuals"])
-            theoretical_t_MRCA.loc[idx] = [row["HGT_rate"], t_theo, row["n_individuals"]]
+            t_theo = (2 / (simulation_parameters['speciation_rate'][0] + row['HGT_rate'])) * (1 - 1 / row['n_individuals'])
+            theoretical_t_MRCA.loc[idx] = [row['HGT_rate'], t_theo, row['n_individuals']]
 
-        sns.scatterplot(theoretical_t_MRCA, x="HGT_rate", y="T_MRCA", color="red", marker="x", zorder=7, legend=False)
+        sns.scatterplot(theoretical_t_MRCA, x='HGT_rate', y='T_MRCA', color='red', marker='x', zorder=7, legend=False)
 
-    plt.xlabel("HGT rate")
-    plt.ylabel("Time to the MRCA (allele process)")
+    plt.xlabel('HGT rate')
+    plt.ylabel('Time to the MRCA (allele process)')
 
-    plt.savefig(os.path.join(output_dir, "Talleles_vs_HGTrate.png"), transparent=True, dpi=300)
+    plt.savefig(os.path.join(output_dir, 'Talleles_vs_HGTrate.png'), transparent=True, dpi=300)
     plt.close()
 
     # distribution of T_MRCA(genes)/T_MRCA(species)
-    sns.set_theme(style="whitegrid", font_scale=1.3)
-    fig, axes = plt.subplots(2, 2, figsize=(14, 10), sharex=True, sharey="row")
+    sns.set_theme(style='whitegrid', font_scale=1.3)
+    fig, axes = plt.subplots(2, 2, figsize=(14, 10), sharex=True, sharey='row')
     axes = axes.flatten()
 
     prediction_points = np.linspace(0, 1, 200)
     df_p_1 = pd.DataFrame(columns=simulation_parameters['n_individuals'])
     for ax, n_indiv in zip(axes, simulation_parameters['n_individuals']):  # n_indiv in n_individuals:
-        data = pd.DataFrame(columns=["time_species"] + [f"time_alleles_{i}" for i in range(simulation_parameters['n_genes'])] + ["HGT_rate"])
+        data = pd.DataFrame(columns=['time_species'] + [f'time_alleles_{i}' for i in range(simulation_parameters['n_genes'])] + ['HGT_rate'])
         for rate_HGT in simulation_parameters['HGT_rate']:
             results = pd.read_csv(
-                os.path.join(input_dir, f"ind_{n_indiv}_srate_{simulation_parameters['speciation_rate'][0]}_HGTrate_{rate_HGT}.csv"))
-            results["HGT_rate"] = str(round(rate_HGT, 2))
+                os.path.join(input_dir, f'ind_{n_indiv}_srate_{simulation_parameters["speciation_rate"][0]}_HGTrate_{rate_HGT}.csv'))
+            results['HGT_rate'] = str(round(rate_HGT, 2))
             data = pd.concat([data, results], ignore_index=True)
         data.iloc[:, 1:-1] = data.iloc[:, 1:-1].div(data.time_species, axis=0)
 
-        bounded_kdes = pd.DataFrame(columns=["x", "density", "HGT_rate"])
+        bounded_kdes = pd.DataFrame(columns=['x', 'density', 'HGT_rate'])
         p_1 = pd.Series()
-        for rate_HGT in data["HGT_rate"].unique():
-            observations = data[data["HGT_rate"] == rate_HGT]["time_alleles_0"].values
+        for rate_HGT in data['HGT_rate'].unique():
+            observations = data[data['HGT_rate'] == rate_HGT]['time_alleles_0'].values
             p_1[rate_HGT] = sum(observations >= 1) / len(observations)
             prediction = weighted_kde(observations[observations < 1], prediction_points) * (1 - p_1[rate_HGT])
-            kd_estimate = pd.DataFrame({"x": prediction_points, "density": prediction})
-            kd_estimate["HGT_rate"] = rate_HGT
+            kd_estimate = pd.DataFrame({'x': prediction_points, 'density': prediction})
+            kd_estimate['HGT_rate'] = rate_HGT
             bounded_kdes = pd.concat([bounded_kdes, kd_estimate])
         df_p_1[n_indiv] = p_1
 
-        sns.lineplot(data=bounded_kdes, x="x", y="density", hue="HGT_rate", palette="crest", ax=ax)
-        ax.set_xlabel("time")
-        ax.set_title(f"Number of species: {n_indiv}")
+        sns.lineplot(data=bounded_kdes, x='x', y='density', hue='HGT_rate', palette='crest', ax=ax)
+        ax.set_xlabel('time')
+        ax.set_title(f'Number of species: {n_indiv}')
         ax.legend().remove()
 
         # Reorder all lines
@@ -208,7 +208,7 @@ if __name__ == '__main__':
     fig.legend(
         handles,
         labels,
-        title="HGT rate",
+        title='HGT rate',
         bbox_to_anchor=(0.95, 0.5),
         loc='center right',
         frameon=False,
@@ -216,27 +216,27 @@ if __name__ == '__main__':
     )
 
     plt.tight_layout(rect=[0, 0, 0.85, 1])
-    plt.savefig(os.path.join(output_dir, f"kdes_ratio_all_indiv.png"), transparent=True, bbox_inches='tight',
+    plt.savefig(os.path.join(output_dir, f'kdes_ratio_all_indiv.png'), transparent=True, bbox_inches='tight',
                 dpi=300)
     plt.close()
 
     # plotting the fraction of gene processes where T_MRCA(genes)/T_MRCA(species) = 1
-    sns.set_theme(style="whitegrid", font_scale=1.3)
-    df_p_1_long = df_p_1.reset_index().rename(columns={"index": "HGT_rate"})
-    df_p_1_long["HGT_rate"] = df_p_1_long["HGT_rate"].astype(float)
-    df_p_1_long = df_p_1_long.melt(id_vars="HGT_rate", var_name="n_indiv", value_name="fraction")
-    sns.lineplot(data=df_p_1_long, x="HGT_rate", y="fraction", hue="n_indiv", palette="crest")
-    plt.ylabel("")
-    plt.xlabel("HGT rate")
-    plt.legend(title="Number of\n Species")
+    sns.set_theme(style='whitegrid', font_scale=1.3)
+    df_p_1_long = df_p_1.reset_index().rename(columns={'index': 'HGT_rate'})
+    df_p_1_long['HGT_rate'] = df_p_1_long['HGT_rate'].astype(float)
+    df_p_1_long = df_p_1_long.melt(id_vars='HGT_rate', var_name='n_indiv', value_name='fraction')
+    sns.lineplot(data=df_p_1_long, x='HGT_rate', y='fraction', hue='n_indiv', palette='crest')
+    plt.ylabel('')
+    plt.xlabel('HGT rate')
+    plt.legend(title='Number of\n Species')
 
-    plt.savefig(os.path.join(output_dir, f"fraction_equal_T_MRCA.png"), transparent=True, bbox_inches='tight',
+    plt.savefig(os.path.join(output_dir, f'fraction_equal_T_MRCA.png'), transparent=True, bbox_inches='tight',
                 dpi=300)
 
 
     # qq-plots for the T_MRCA(genes), if we used uniform HGT
     if simulation_parameters['HGT_type'] == 'uniform':
-        qq_dir = os.path.join(output_dir, "qq_plots")
+        qq_dir = os.path.join(output_dir, 'qq_plots')
         os.makedirs(qq_dir, exist_ok=True)
 
         n_quantiles = simulation_parameters['sample_size']
@@ -247,8 +247,8 @@ if __name__ == '__main__':
         for n_indiv in simulation_parameters['n_individuals']:
             for rate_HGT in simulation_parameters['HGT_rate']:
                 emp_times = \
-                pd.read_csv(os.path.join(input_dir, f"ind_{n_indiv}_srate_{simulation_parameters['speciation_rate'][0]}_HGTrate_{rate_HGT}.csv"))[
-                    f"time_alleles_0"]
+                pd.read_csv(os.path.join(input_dir, f'ind_{n_indiv}_srate_{simulation_parameters["speciation_rate"][0]}_HGTrate_{rate_HGT}.csv'))[
+                    f'time_alleles_0']
                 theo_times = time_MRCA_alleles(sample_size=len(emp_times), n_individuals=n_indiv, HGT_rate=rate_HGT)
 
                 mse = mean_squared_error(theo_times.sort_values(), emp_times.sort_values())
@@ -263,15 +263,15 @@ if __name__ == '__main__':
                 sns.scatterplot(x=theoretic_quantiles, y=empirical_quantiles, size=1, linewidth=0, legend=False, zorder=3)
                 plt.xlim(0, theo_times.max() + 0.1)
                 plt.ylim(0, emp_times.max() + 0.1)
-                # plt.axline((0, b), slope=a, color="lightblue") #regression fit
-                plt.axline((0, 0), slope=1, linestyle="--", color="black", zorder=5)  # identity
-                plt.xlabel("theoretic quantiles")
-                plt.ylabel("empirical quantiles")
+                # plt.axline((0, b), slope=a, color='lightblue') #regression fit
+                plt.axline((0, 0), slope=1, linestyle='--', color='black', zorder=5)  # identity
+                plt.xlabel('theoretic quantiles')
+                plt.ylabel('empirical quantiles')
                 plt.savefig(os.path.join(qq_dir,
-                            f"qq_plot_ind_{n_indiv}_srate_{simulation_parameters['speciation_rate'][0]}_HGTrate_{round(rate_HGT, 2)}.png"),
+                            f'qq_plot_ind_{n_indiv}_srate_{simulation_parameters["speciation_rate"][0]}_HGTrate_{round(rate_HGT, 2)}.png'),
                             transparent=True, bbox_inches='tight', dpi=300)
                 plt.close()
-        mses.to_csv(os.path.join(qq_dir, "MSE_qq_T_MRCA_latex.csv"), sep="&")
+        mses.to_csv(os.path.join(qq_dir, 'MSE_qq_T_MRCA_latex.csv'), sep='&')
 
 
     # plotting average tree distances

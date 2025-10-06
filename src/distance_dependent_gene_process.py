@@ -6,7 +6,7 @@ from itertools import product
 import dendropy
 from phylodm import PhyloDM
 
-from simulation.kingmans_coalescent import iterative_tree_build, update_tree_string
+from src.kingmans_coalescent import iterative_tree_build, update_tree_string
 
 tns = dendropy.TaxonNamespace()
 rng = np.random.default_rng()
@@ -120,7 +120,7 @@ def iterative_dd_gene_tree_build_ihpp(
             time = time_of_next_HGT_event
         else:
             # speciation happens
-            event_type = "speciation"
+            event_type = 'speciation'
             merging_species = realised_coalescent_events[
                 realised_coalescent_events['time'] == t_next_realised_speciation_event]
 
@@ -165,37 +165,7 @@ def iterative_dd_gene_tree_build_ihpp(
                 current_species_dist_matrix = current_species_dist_matrix.drop(death, axis=0)  # delete recipient row
 
         else:
-            assert event_type == "speciation"
+            assert event_type == 'speciation'
             current_species_dist_matrix = current_species_dist_matrix.drop(death, axis=0) # delete recipient row
 
     return allele_tree_string, allele_tree_string, HGT_count
-
-if __name__ == '__main__':
-    n_individuals = 5
-    speciation_rate = 1
-
-    tree_dict, tree_string, realised_coalescent_events, surviving_lineages = iterative_tree_build(
-                n_individuals=n_individuals,
-                rate=speciation_rate,
-    )
-
-    species_tree = dendropy.Tree.get(
-        data=list(tree_string.values())[0][0] + ";",
-        schema="newick",
-        taxon_namespace=tns,
-    )
-
-    species_tree_phylo = PhyloDM.load_from_dendropy(species_tree)
-    dm_species_tree = species_tree_phylo.dm(norm=False)
-
-    HGT_rate = 1
-
-    allele_tree_dict, allele_tree_string, n_HGTs = iterative_dd_gene_tree_build_ihpp(
-        n_individuals=n_individuals,
-        HGT_rate=HGT_rate,
-        realised_coalescent_events=realised_coalescent_events,
-        species_dist_matrix=dm_species_tree,
-    )
-
-    print(allele_tree_string)
-

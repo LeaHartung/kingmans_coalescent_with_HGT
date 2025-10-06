@@ -22,8 +22,8 @@ def update_tree_string(
     :param time: time of the event
     :return: updated tree_string dictionary
     """
-    tree_string[birth][0] = f"({tree_string[birth][0]}:{time - tree_string[birth][1]}," \
-                            f" {tree_string[death][0]}:{time - tree_string[death][1]})"
+    tree_string[birth][0] = f'({tree_string[birth][0]}:{time - tree_string[birth][1]},' \
+                            f' {tree_string[death][0]}:{time - tree_string[death][1]})'
     tree_string[birth][1] = time
     tree_string.pop(death)
 
@@ -49,8 +49,8 @@ def iterative_tree_build(
     tree_dict = dict([(i, i) for i in individuals])
     tree_string = dict([(i, [str(i), 0]) for i in individuals])
 
-    realised_coalescent_events = pd.DataFrame(columns=["time", "from", "to"])
-    surviving_lineages = pd.DataFrame(columns=["time", "surviving_lineages"])
+    realised_coalescent_events = pd.DataFrame(columns=['time', 'from', 'to'])
+    surviving_lineages = pd.DataFrame(columns=['time', 'surviving_lineages'])
     surviving_lineages.loc[0] = [0, list(individuals)]
 
     # loop over the number of blocks left in the partition process
@@ -89,18 +89,3 @@ def iterative_tree_build(
     surviving_lineages = surviving_lineages.reset_index(drop=True)
 
     return tree_dict, tree_string, realised_coalescent_events, surviving_lineages
-
-
-if __name__ == "__main__":
-    n_individuals = 5
-    speciation_rate = 1
-
-    tree_dict, tree_string, realised_coalescence_events, surviving_lineages = iterative_tree_build(
-        n_individuals=n_individuals,
-        rate=speciation_rate,
-    )
-
-    print(tree_dict)
-    print(tree_string)
-    print(realised_coalescence_events)
-    print(surviving_lineages)

@@ -4,7 +4,7 @@ import random
 
 from itertools import product, permutations
 
-from .kingmans_coalescent import iterative_tree_build, update_tree_string
+from src.kingmans_coalescent import iterative_tree_build, update_tree_string
 
 
 def iterative_gene_tree_build(
@@ -59,7 +59,7 @@ def iterative_gene_tree_build(
             death = merging_lines[1]
         else:
             # speciation happens
-            event_type = "speciation"
+            event_type = 'speciation'
 
             merging_species = realised_coalescent_events[
                 realised_coalescent_events['time'] == t_next_realised_speciation_event]
@@ -93,25 +93,3 @@ def iterative_gene_tree_build(
                 HGT_count += 1
 
     return allele_tree_string, allele_tree_string, HGT_count
-
-
-if __name__ == '__main__':
-    n_individuals = 5
-    speciation_rate = 1
-
-    tree_dict, tree_string, realised_coalescent_events, surviving_lineages = iterative_tree_build(
-                n_individuals=n_individuals,
-                rate=speciation_rate,
-    )
-
-    HGT_rate = 1
-
-    allele_tree_dict, allele_tree_string, n_HGTs = iterative_gene_tree_build(
-        n_individuals=n_individuals,
-        HGT_rate=HGT_rate,
-        realised_coalescent_events=realised_coalescent_events,
-        surviving_lineages=surviving_lineages,
-    )
-
-    print(allele_tree_string)
-

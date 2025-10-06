@@ -63,11 +63,11 @@ def bl_distance(nwk1, nwk2, normalise: bool = False):
     :return: Branch length distance between the two trees
     """
     tree_1 = dendropy.Tree.get(data=nwk1,
-                               schema="newick",
+                               schema='newick',
                                taxon_namespace=tns
                                )
     tree_2 = dendropy.Tree.get(data=nwk2,
-                               schema="newick",
+                               schema='newick',
                                taxon_namespace=tns
                                )
     if normalise:
@@ -85,13 +85,13 @@ def dist_matr_distance(nwk1, nwk2, normalise: bool = False):
     :return: Distance matrix based distance between the two trees
     """
     tree_1_dp = dendropy.Tree.get(data=nwk1,
-                               schema="newick",
+                               schema='newick',
                                taxon_namespace=tns
                                )
     tree_1 = PhyloDM.load_from_dendropy(tree_1_dp)
     dm_tree_1 = tree_1.dm(norm=False)
     tree_2_dp = dendropy.Tree.get(data=nwk2,
-                               schema="newick",
+                               schema='newick',
                                taxon_namespace=tns
                                )
     tree_2 = PhyloDM.load_from_dendropy(tree_2_dp)
@@ -113,7 +113,7 @@ def distances_species_gene(nwk_dataframe: pd.DataFrame,
     :return: A dataframe that holds the distances between the first column and all other columns.
     """
     n_genes = nwk_dataframe.shape[1] - 1
-    assert nwk_dataframe.shape[1] > 1, "Only species trees provided."
+    assert nwk_dataframe.shape[1] > 1, 'Only species trees provided.'
     distances_sp = pd.DataFrame(columns=list(range(n_genes)))
     for idx, row in nwk_dataframe.iterrows():
         nwk_species = row.iloc[0]
@@ -137,7 +137,7 @@ def distances_between_genes(nwk_dataframe: pd.DataFrame,
     :return: A dataframe that holds the pairwise distances between the columns 2:end.
     """
     n_genes = nwk_dataframe.shape[1] - 1
-    assert nwk_dataframe.shape[1] > 2, "Less than two gene trees per species tree provided."
+    assert nwk_dataframe.shape[1] > 2, 'Less than two gene trees per species tree provided.'
 
     combs = list(combinations(range(1, n_genes + 1), 2))
     distances_genes= pd.DataFrame(columns=list(combs))
@@ -173,29 +173,29 @@ def average_distances(input_dir,
     :return: Dataframe holding the average distances per n_individual, HGT_rate, and gene process
     """
     parent_dir = os.path.dirname(save_file)
-    assert os.path.exists(parent_dir), "The parent directory of the save file does not exist: {}".format(parent_dir)
+    assert os.path.exists(parent_dir), 'The parent directory of the save file does not exist: {}'.format(parent_dir)
 
     if task == 'species_vs_gene':
         distance_retrieval_function = distances_species_gene
         avrg_distances = pd.DataFrame(
-            columns=["n_individuals", "HGT_rate"] + [f"distance_gene_{i}" for i in range(n_genes)]
+            columns=['n_individuals', 'HGT_rate'] + [f'distance_gene_{i}' for i in range(n_genes)]
         )
     elif task == 'gene_vs_gene':
         distance_retrieval_function = distances_between_genes
         combs = list(combinations(range(n_genes), 2))
         avrg_distances = pd.DataFrame(
-            columns=["n_individuals", "HGT_rate"] + [f"distance_gene_{x}" for x in combs]
+            columns=['n_individuals', 'HGT_rate'] + [f'distance_gene_{x}' for x in combs]
         )
     else:
-        raise ValueError("'task' must be either 'species_vs_gene' or 'genes_vs_gene'.")
+        raise ValueError('\'task\' must be either \'species_vs_gene\' or \'genes_vs_gene\'')
 
 
     counter = 0
     for i in range(len(n_individuals)):
         for k in range(len(HGT_rate)):
-            print(f"Processing Individuals: {n_individuals[i]}, HGT-rate: {HGT_rate[k]}")
+            print(f'Processing Individuals: {n_individuals[i]}, HGT-rate: {HGT_rate[k]}')
             nwk_dataframe = pd.read_csv(os.path.join(input_dir,
-                                       f"ind_{n_individuals[i]}_srate_{speciation_rate}_HGTrate_{HGT_rate[k]}.csv"))
+                                       f'ind_{n_individuals[i]}_srate_{speciation_rate}_HGTrate_{HGT_rate[k]}.csv'))
             distances = distance_retrieval_function(nwk_dataframe,distance_function)
 
             avrg_distances.loc[counter] = [n_individuals[i], np.round(HGT_rate[k], 2)] + list(
@@ -204,32 +204,3 @@ def average_distances(input_dir,
 
     avrg_distances.to_csv(save_file, index=False)
     return avrg_distances
-
-
-
-if __name__ == '__main__':
-    nwk1 = "((3:0.40423157232759777, (4:0.2478364463156182, 0:0.2478364463156182):0.15639512601197958):0.21134272078739158, (1:0.6059330781358645, 2:0.6059330781358645):0.009641214979124846);"
-    nwk2 = "((3:0.40423157232759777, (4:0.2478364463156182, 0:0.2478364463156182):0.15639512601197958):0.21134272078739158, (1:0.6059330781358645, 2:0.6059330781358645):0.009641214979124846);"
-    nwk3 = "((3:0.40423157232759777, (4:0.2478364463156182, (0:0.1775268810369201, 2:0.1775268810369201):0.07030956527869808):0.15639512601197958):0.21134272078739158, 1:0.6155742931149893);"
-    nwk4 = "((3:0.40423157232759777, (4:0.2478364463156182, 0:0.2478364463156182):0.15639512601197958):0.21134272078739158, (1:0.6059330781358645, 2:0.6059330781358645):0.009641214979124846);"
-
-    print(rf_distance(nwk1, nwk3))
-    print(bl_distance(nwk1, nwk3))
-    print(bl_distance(nwk1, nwk3, normalise=True))
-    print(dist_matr_distance(nwk1, nwk3))
-    print(dist_matr_distance(nwk1, nwk3, normalise=True))
-
-    nwk_df = pd.DataFrame(data=[[nwk1, nwk2, nwk3, nwk4]],
-                          columns=["species_tree", "gene_tree_1", "gene_tree_2", "gene_tree_3"]
-                          )
-
-    distances_to_species = distances_species_gene(nwk_df,
-                                       rf_distance,
-                                       )
-    print(distances_to_species)
-
-    distances_genes = distances_between_genes(nwk_df,
-                                              rf_distance,
-                                              )
-
-
