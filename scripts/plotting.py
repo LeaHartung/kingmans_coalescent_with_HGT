@@ -23,12 +23,12 @@ def try_eval(x):
 
 
 # implementation of bounded KDE from https://towardsdatascience.com/bounded-kernel-density-estimation-2082dff3f47f/
-def silverman_bandwidth(x_data: np.ndarray) -> float:
+def silverman_bandwidth(x_data: np.ndarray) -> float: # from https://towardsdatascience.com/bounded-kernel-density-estimation-2082dff3f47f/
     ma_x_data = np.ma.masked_array(x_data, ~np.isfinite(x_data))
     return (4/(3*x_data.shape[0]))**0.2 * np.std(ma_x_data)
 
 
-def basic_kde(x_data: np.ndarray, x_prediction: np.ndarray) -> np.ndarray:
+def basic_kde(x_data: np.ndarray, x_prediction: np.ndarray) -> np.ndarray: # from https://towardsdatascience.com/bounded-kernel-density-estimation-2082dff3f47f/
     """Perform Gaussian Kernel Density Estimation.
     Args:
         x_data: Sample points drawn from the distribution to estimate.
@@ -46,7 +46,7 @@ def basic_kde(x_data: np.ndarray, x_prediction: np.ndarray) -> np.ndarray:
     densities = np.mean(pdf_values, axis=0)
     return densities
 
-def weighted_kde(x_data: np.ndarray, x_prediction: np.ndarray) -> np.ndarray:
+def weighted_kde(x_data: np.ndarray, x_prediction: np.ndarray) -> np.ndarray: # from https://towardsdatascience.com/bounded-kernel-density-estimation-2082dff3f47f/
     h = silverman_bandwidth(x_data)  # Required to evaluate CDF
     area_values = norm.cdf(1.0, x_prediction, h) - norm.cdf(0.0, x_prediction, h)
     basic_densities = basic_kde(x_data, x_prediction)
